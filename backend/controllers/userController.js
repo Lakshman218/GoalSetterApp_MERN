@@ -35,7 +35,8 @@ const registerUser = asyncHandler(async(req, res) => {
     res.status(201).json({
       _id: user.id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      token: generateToken(user._id)
     })
   } else {
     res.status(400)
@@ -54,7 +55,8 @@ const loginUser = asyncHandler(async(req, res) => {
     res.json({
       _id: user.id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      token: generateToken(user._id)
     })
   } else {
     res.status(400)
@@ -63,12 +65,23 @@ const loginUser = asyncHandler(async(req, res) => {
  
   res.json({ message: 'Login User'})
 })
-// register get user data
-// post /api/users/me
-// access public
+
 const getMe = asyncHandler(async(req, res) => {
-  res.json({ message: 'Display user data'})
+  const {_id, name, email } = await User.findById(req.user.id) 
+
+  res.status(200).json({
+    id: _id,
+    name, 
+    email,
+  })
 })
+
+// generat jwt
+const generateToken = (id) => {
+  return jwt.sign({id}, process.env.JWT_SECRET, {
+    expiresIn: '30d',
+  })
+}
 
 module.exports = {
   registerUser,loginUser,getMe
